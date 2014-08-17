@@ -441,6 +441,19 @@ AM_ICONV()
 
 AM_CONDITIONAL(NO_VERSION_SCRIPT, test x$no_version_script = xyes)
 
+# Header checks.
+AC_HEADER_MAJOR
+AC_HEADER_STDBOOL
+AC_CHECK_HEADERS([fcntl.h])
+AC_CHECK_HEADERS([float.h])
+AC_CHECK_HEADERS([limits.h])
+AC_CHECK_HEADERS([locale.h])
+AC_CHECK_HEADERS([malloc.h])
+AC_CHECK_HEADERS([stddef.h])
+AC_CHECK_HEADERS([arpa/inet.h])
+AC_CHECK_HEADERS([mach/mach.h])
+AC_CHECK_HEADERS([sys/systeminfo.h])
+AC_CHECK_HEADERS([sys/vfs.h])
 AC_CHECK_HEADERS(sys/filio.h sys/sockio.h netdb.h utime.h sys/utime.h semaphore.h sys/un.h linux/rtc.h sys/syscall.h sys/mkdev.h sys/uio.h sys/param.h libproc.h)
 AC_CHECK_HEADERS(sys/param.h sys/socket.h sys/ipc.h sys/sem.h sys/utsname.h alloca.h ucontext.h pwd.h sys/select.h netinet/tcp.h netinet/in.h unistd.h sys/types.h link.h asm/sigcontext.h sys/inotify.h)
 AC_CHECK_HEADERS([linux/netlink.h linux/rtnetlink.h],
@@ -455,6 +468,92 @@ AC_CHECK_HEADERS(sys/user.h, [], [],
 #endif
 ])
 
+# Type definition checks.
+AC_TYPE_INT16_T
+AC_TYPE_INT32_T
+AC_TYPE_INT64_T
+AC_TYPE_INT8_T
+AC_TYPE_MODE_T
+AC_TYPE_OFF_T
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+AC_TYPE_UID_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
+AC_TYPE_UINT64_T
+AC_TYPE_UINT8_T
+AC_CHECK_TYPES([ptrdiff_t])
+
+# Function checks.
+AC_FUNC_ALLOCA
+AC_FUNC_FORK
+AC_FUNC_GETMNTENT
+AC_FUNC_LSTAT_FOLLOWS_SLASHED_SYMLINK
+AC_FUNC_MALLOC
+AC_FUNC_MKTIME
+AC_FUNC_MMAP
+AC_FUNC_REALLOC
+AC_FUNC_STRERROR_R
+AC_FUNC_STRTOD
+AC_CHECK_FUNCS([alarm])
+AC_CHECK_FUNCS([atexit])
+AC_CHECK_FUNCS([bzero])
+AC_CHECK_FUNCS([clock_gettime])
+AC_CHECK_FUNCS([dup2])
+AC_CHECK_FUNCS([floor])
+AC_CHECK_FUNCS([ftruncate])
+AC_CHECK_FUNCS([getcwd])
+AC_CHECK_FUNCS([gethostbyaddr])
+AC_CHECK_FUNCS([gethostbyname])
+AC_CHECK_FUNCS([gethostname])
+AC_CHECK_FUNCS([getmntent])
+AC_CHECK_FUNCS([getpagesize])
+AC_CHECK_FUNCS([gettimeofday])
+AC_CHECK_FUNCS([inet_ntoa])
+AC_CHECK_FUNCS([isascii])
+AC_CHECK_FUNCS([localeconv])
+AC_CHECK_FUNCS([memchr])
+AC_CHECK_FUNCS([memmove])
+AC_CHECK_FUNCS([memset])
+AC_CHECK_FUNCS([mkdir])
+AC_CHECK_FUNCS([modf])
+AC_CHECK_FUNCS([munmap])
+AC_CHECK_FUNCS([pathconf])
+AC_CHECK_FUNCS([pow])
+AC_CHECK_FUNCS([regcomp])
+AC_CHECK_FUNCS([rmdir])
+AC_CHECK_FUNCS([select])
+AC_CHECK_FUNCS([setlocale])
+AC_CHECK_FUNCS([socket])
+AC_CHECK_FUNCS([sqrt])
+AC_CHECK_FUNCS([strchr])
+AC_CHECK_FUNCS([strcspn])
+AC_CHECK_FUNCS([strdup])
+AC_CHECK_FUNCS([strerror])
+AC_CHECK_FUNCS([strncasecmp])
+AC_CHECK_FUNCS([strpbrk])
+AC_CHECK_FUNCS([strrchr])
+AC_CHECK_FUNCS([strstr])
+AC_CHECK_FUNCS([strtol])
+AC_CHECK_FUNCS([strtoul])
+AC_CHECK_FUNCS([strtoull])
+AC_CHECK_FUNCS([sysinfo])
+AC_CHECK_FUNCS([uname])
+AC_CHECK_FUNCS([utime])
+
+# Struct checks.
+AC_STRUCT_ST_BLOCKS
+
+# Member checks.
+AC_CHECK_MEMBERS([struct stat.st_blksize])
+AC_CHECK_MEMBERS([struct stat.st_rdev])
+
+# These programs may be needed, depending on the platform being targeted.
+AC_PROG_RANLIB
+AC_PROG_YACC
+
+# Check for zlib.
 AC_CHECK_HEADER(zlib.h, [have_zlib=yes], [have_zlib=no])
 if test x$have_zlib = xyes; then
    AC_TRY_COMPILE([#include <zlib.h>], [
