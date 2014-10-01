@@ -37,99 +37,193 @@ using System.Threading;
 
 namespace System.IO {
 
-        [Flags]
-        enum EventFlags : ushort {
-                Add         = 0x0001,
-                Delete      = 0x0002,
-                Enable      = 0x0004,
-                Disable     = 0x0008,
-                OneShot     = 0x0010,
-                Clear       = 0x0020,
-                Receipt     = 0x0040,
-                Dispatch    = 0x0080,
+    [Flags]
+    enum EventFlags : ushort {
+		/* Actions */
+		/// <summary>
+		/// add event to kq (implies enable)
+		/// </summary>
+        Add         = (ushort)0x0001,
+		/// <summary>
+		/// delete event from kq
+		/// </summary>
+        Delete      = (ushort)0x0002,
+		/// <summary>
+		/// enable event
+		/// </summary>
+        Enable      = (ushort)0x0004,
+		/// <summary>
+		/// disable event (not reported)
+		/// </summary>
+        Disable     = (ushort)0x0008,
+		/// <summary>
+		/// force <see cref="EventFlags.Error"/> on success, data == 0
+		/// </summary>
+		Receipt = (ushort)0x0040,
 
-                Flag0       = 0x1000,
-                Flag1       = 0x2000,
-                SystemFlags = unchecked (0xf000),
+		/* Flags */
+
+		/// <summary>
+		/// only report one occurrence
+		/// </summary>
+        OneShot     = (ushort)0x0010,
+		/// <summary>
+		/// clear event state after reporting
+		/// </summary>
+        Clear       = (ushort)0x0020,
+		/// <summary>
+		/// disable event after reporting
+		/// </summary>
+        Dispatch    = (ushort)0x0080,
+		/// <summary>
+		/// filter-specific flag
+		/// </summary>
+        Flag0       = (ushort)0x1000,
+		/// <summary>
+		/// filter-specific flag
+		/// </summary>
+        Flag1       = (ushort)0x2000,
+		/// <summary>
+		/// reserved by system
+		/// </summary>
+        SystemFlags = (ushort)0xf000,
                         
-                // Return values.
-                EOF         = 0x8000,
-                Error       = 0x4000,
-        }
+        /* Return values. */
+		/// <summary>
+		/// EOF detected
+		/// </summary>
+        EOF         = (ushort)0x8000,
+		/// <summary>
+		/// error, data contains errno
+		/// </summary>
+        Error       = (ushort)0x4000,
+    }
         
-        enum EventFilter : short {
-                Read = -1,
-                Write = -2,
-                Aio = -3,
-                Vnode = -4,
-                Proc = -5,
-                Signal = -6,
-                Timer = -7,
-                MachPort = -8,
-                FS = -9,
-                User = -10,
-                VM = -11
-        }
+    enum EventFilter : short {
+        Read = -1,
+        Write = -2,
+		/// <summary>
+		/// attached to aio requests
+		/// </summary>
+        Aio = -3,
+		/// <summary>
+		/// attached to vnodes
+		/// </summary>
+        Vnode = -4,
+		/// <summary>
+		/// attached to struct proc
+		/// </summary>
+        Proc = -5,
+		/// <summary>
+		/// attached to struct proc
+		/// </summary>
+        Signal = -6,
+		/// <summary>
+		/// timers
+		/// </summary>
+        Timer = -7,
+		/// <summary>
+		/// Mach portsets
+		/// </summary>
+        MachPort = -8,
+		/// <summary>
+		/// Filesystem events
+		/// </summary>
+        FS = -9,
+		/// <summary>
+		/// User events
+		/// </summary>
+        User = -10,
+		/// <summary>
+		/// Audit session events
+		/// </summary>
+        VM = -11
+    }
 
 	enum FilterFlags : uint {
-                ReadPoll          = EventFlags.Flag0,
-                ReadOutOfBand     = EventFlags.Flag1,
-                ReadLowWaterMark  = 0x00000001,
+        ReadPoll          = EventFlags.Flag0,
+        ReadOutOfBand     = EventFlags.Flag1,
+        ReadLowWaterMark  = 0x00000001u,
 
-                WriteLowWaterMark = ReadLowWaterMark,
+        WriteLowWaterMark = ReadLowWaterMark,
 
-                NoteTrigger       = 0x01000000,
-                NoteFFNop         = 0x00000000,
-                NoteFFAnd         = 0x40000000,
-                NoteFFOr          = 0x80000000,
-                NoteFFCopy        = 0xc0000000,
-                NoteFFCtrlMask    = 0xc0000000,
-                NoteFFlagsMask    = 0x00ffffff,
+        NoteTrigger       = 0x01000000u,
+        NoteFFNop         = 0x00000000u,
+        NoteFFAnd         = 0x40000000u,
+        NoteFFOr          = 0x80000000u,
+        NoteFFCopy        = 0xc0000000u,
+        NoteFFCtrlMask    = 0xc0000000u,
+        NoteFFlagsMask    = 0x00ffffffu,
                                   
-                VNodeDelete       = 0x00000001,
-                VNodeWrite        = 0x00000002,
-                VNodeExtend       = 0x00000004,
-                VNodeAttrib       = 0x00000008,
-                VNodeLink         = 0x00000010,
-                VNodeRename       = 0x00000020,
-                VNodeRevoke       = 0x00000040,
-                VNodeNone         = 0x00000080,
+        VNodeDelete       = 0x00000001u,
+        VNodeWrite        = 0x00000002u,
+        VNodeExtend       = 0x00000004u,
+        VNodeAttrib       = 0x00000008u,
+        VNodeLink         = 0x00000010u,
+        VNodeRename       = 0x00000020u,
+        VNodeRevoke       = 0x00000040u,
+        VNodeNone         = 0x00000080u,
                                   
-                ProcExit          = 0x80000000,
-                ProcFork          = 0x40000000,
-                ProcExec          = 0x20000000,
-                ProcReap          = 0x10000000,
-                ProcSignal        = 0x08000000,
-                ProcExitStatus    = 0x04000000,
-                ProcResourceEnd   = 0x02000000,
+        ProcExit          = 0x80000000u,
+        ProcFork          = 0x40000000u,
+        ProcExec          = 0x20000000u,
+        ProcReap          = 0x10000000u,
+        ProcSignal        = 0x08000000u,
+        ProcExitStatus    = 0x04000000u,
+        ProcResourceEnd   = 0x02000000u,
 
-                // iOS only
-                ProcAppactive     = 0x00800000,
-                ProcAppBackground = 0x00400000,
-                ProcAppNonUI      = 0x00200000,
-                ProcAppInactive   = 0x00100000,
-                ProcAppAllStates  = 0x00f00000,
+        // iOS only
+        ProcAppactive     = 0x00800000u,
+        ProcAppBackground = 0x00400000u,
+        ProcAppNonUI      = 0x00200000u,
+        ProcAppInactive   = 0x00100000u,
+        ProcAppAllStates  = 0x00f00000u,
 
-                // Masks
-                ProcPDataMask     = 0x000fffff,
-                ProcControlMask   = 0xfff00000,
+        // Masks
+        ProcPDataMask     = 0x000fffffu,
+        ProcControlMask   = 0xfff00000u,
 
-                VMPressure        = 0x80000000,
-                VMPressureTerminate = 0x40000000,
-                VMPressureSuddenTerminate = 0x20000000,
-                VMError           = 0x10000000,
-                TimerSeconds      =    0x00000001,
-                TimerMicroSeconds =   0x00000002,
-                TimerNanoSeconds  =   0x00000004,
-                TimerAbsolute     =   0x00000008,
+        VMPressure        = 0x80000000u,
+        VMPressureTerminate = 0x40000000u,
+        VMPressureSuddenTerminate = 0x20000000u,
+        VMError           = 0x10000000u,
+        TimerSeconds      =    0x00000001u,
+        TimerMicroSeconds =   0x00000002u,
+        TimerNanoSeconds  =   0x00000004u,
+        TimerAbsolute     =   0x00000008u,
         }
 			
 	struct kevent : IDisposable {
-		public int ident;
+		/// <summary>
+		/// Value used to identify this event.
+		/// The exact interpretation is determined by the attached filter, but often is a file descriptor.
+		/// </summary>
+		public UIntPtr ident;
+		
+		/// <summary>
+		/// Identifies the kernel filter used to process this event.
+		/// The pre-defined system filters are described below.
+		/// </summary>
 		public EventFilter filter;
+		
+		/// <summary>
+		/// Actions to perform on the event.
+		/// </summary>
 		public EventFlags flags;
+		
+		/// <summary>
+		/// Filter-specific flags.
+		/// </summary>
 		public FilterFlags fflags;
-		public int data;
+		
+		/// <summary>
+		/// Filter-specific data value.
+		/// </summary>
+		public IntPtr data;
+		
+		/// <summary>
+		/// Opaque user-defined value passed through the kernel unchanged.
+		/// </summary>
 		public IntPtr udata;
 
 		public void Dispose ()
@@ -139,9 +233,55 @@ namespace System.IO {
 		}
 	}
 
+	unsafe struct kevent64 : IDisposable {
+		/// <summary>
+		/// Value used to identify this event.
+		/// The exact interpretation is determined by the attached filter, but often is a file descriptor.
+		/// </summary>
+		public ulong ident;
+
+		/// <summary>
+		/// Identifies the kernel filter used to process this event.
+		/// The pre-defined system filters are described below.
+		/// </summary>
+		public EventFilter filter;
+
+		/// <summary>
+		/// Actions to perform on the event.
+		/// </summary>
+		public EventFlags flags;
+
+		/// <summary>
+		/// Filter-specific flags.
+		/// </summary>
+		public FilterFlags fflags;
+
+		/// <summary>
+		/// Filter-specific data value.
+		/// </summary>
+		public long data;
+
+		/// <summary>
+		/// Opaque user-defined value passed through the kernel unchanged.
+		/// </summary>
+		public ulong udata;
+
+		/// <summary>
+		/// This field stores extensions for the event's filter.
+		/// What type of extension depends on what type of filter is being used.
+		/// </summary>
+		public fixed ulong ext[2];
+
+		public void Dispose()
+		{
+			if (udata != 0UL)
+				Marshal.FreeHGlobal((IntPtr)udata);
+		}
+	}
+
 	struct timespec {
-		public int tv_sec;
-		public int tv_usec;
+		public IntPtr tv_sec;
+		public IntPtr tv_usec;
 	}
 
 	class KeventFileData {
@@ -157,17 +297,19 @@ namespace System.IO {
 	}
 
 	class KeventData {
-                public FileSystemWatcher FSW;
-                public string Directory;
-                public string FileMask;
-                public bool IncludeSubdirs;
-                public bool Enabled;
+        public FileSystemWatcher FSW;
+        public string Directory;
+        public string FileMask;
+        public bool IncludeSubdirs;
+        public bool Enabled;
 		public Hashtable DirEntries;
 		public kevent ev;
-        }
+    }
 
 	class KeventWatcher : IFileWatcher
 	{
+		private const int c_monitorSleepTimeMilliseconds = 500;
+
 		static bool failed;
 		static KeventWatcher instance;
 		static Hashtable watches;
@@ -246,28 +388,24 @@ namespace System.IO {
 			}
 
 			int fd = open(data.Directory, 0, 0);
-			kevent ev = new kevent();
-			ev.udata = IntPtr.Zero;
-			timespec nullts = new timespec();
-			nullts.tv_sec = 0;
-			nullts.tv_usec = 0;
 			if (fd > 0) {
-				ev.ident = fd;
-				ev.filter = EventFilter.Vnode;
-				ev.flags = EventFlags.Add | EventFlags.Enable | EventFlags.OneShot;
-				ev.fflags = // 20 | 2 | 1 | 8;
-					FilterFlags.VNodeDelete |
-					FilterFlags.VNodeWrite |
-					FilterFlags.VNodeAttrib |
-					// The following two values are the equivalent of the original value "20", but we suspect the original author meant
-					// 0x20, we will review later with some test cases
-					FilterFlags.VNodeLink |
-					FilterFlags.VNodeExtend;
-				ev.data = 0;
-				ev.udata = Marshal.StringToHGlobalAuto (data.Directory);
+				var ev = new kevent() {
+					ident = (UIntPtr)fd,
+					filter = EventFilter.Vnode,
+					flags = EventFlags.Add | EventFlags.Enable | EventFlags.Clear,
+					fflags =
+						FilterFlags.VNodeRename |
+						FilterFlags.VNodeWrite |
+						FilterFlags.VNodeDelete |
+						FilterFlags.VNodeAttrib,
+					udata = Marshal.StringToHGlobalAuto(data.Directory)
+				};
 				kevent outev = new kevent();
-				outev.udata = IntPtr.Zero;
-				kevent (conn, ref ev, 1, ref outev, 0, ref nullts);
+				timespec nullts = new timespec();
+				var retval = kevent(conn, ref ev, 1, ref outev, 0, ref nullts);
+				if ((retval == -1) || ((ev.flags & EventFlags.Error) > 0)) {
+					return;
+				}
 				data.ev = ev;
 				requests [fd] = data;
 			}
@@ -298,39 +436,52 @@ namespace System.IO {
 
 		static void StopMonitoringDirectory (KeventData data)
 		{
-			close(data.ev.ident);
+			close((int)data.ev.ident.ToUInt32());
 		}
 
 		void Monitor ()
 		{
-		
 			while (!stop) {
 				kevent ev = new kevent();
-				ev.udata = IntPtr.Zero;
-				kevent nullev = new kevent();
-				nullev.udata = IntPtr.Zero;
-				timespec ts = new timespec();
-				ts.tv_sec = 0;
-				ts.tv_usec = 0;
 				int haveEvents;
 				lock (this) {
+					// These structs aren't used for anything here,
+					// but we need to pass them into the function anyway.
+					var nullev = new kevent();
+					var ts = new timespec();
 					haveEvents = kevent (conn, ref nullev, 0, ref ev, 1, ref ts);
 				}
 
+				if (haveEvents != 0) {
+					if ((haveEvents == -1) || ((ev.flags & EventFlags.Error) > 0)) {
+						MonitorError ();
+					} else {
+						// Restart monitoring
+						KeventData data = (KeventData) requests [ev.ident];
+						StopMonitoringDirectory (data);
+						StartMonitoringDirectory (data);
+						ProcessEvent (ev);
+					}
+				}
+
 				if (haveEvents > 0) {
-					// Restart monitoring
-					KeventData data = (KeventData) requests [ev.ident];
-					StopMonitoringDirectory (data);
-					StartMonitoringDirectory (data);
-					ProcessEvent (ev);
+					
 				} else {
-					System.Threading.Thread.Sleep (500);
+					System.Threading.Thread.Sleep(c_monitorSleepTimeMilliseconds);
 				}
 			}
 
 			lock (this) {
 				thread = null;
 				stop = false;
+			}
+		}
+
+		void MonitorError()
+		{
+			// Something went wrong. Stop the thread.
+			lock (this) {
+				stop = true;
 			}
 		}
 
@@ -451,11 +602,12 @@ namespace System.IO {
 		[DllImport ("libc")]
 		extern static int close(int fd);
 
-		[DllImport ("libc")]
+		[DllImport ("libc", SetLastError = true)]
 		extern static int kqueue();
 
-		[DllImport ("libc")]
+		[DllImport("libc", SetLastError = true)]
 		extern static int kevent(int kqueue, ref kevent ev, int nchanges, ref kevent evtlist,  int nevents, ref timespec ts);
 	}
 }
+
 
