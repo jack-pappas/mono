@@ -4549,6 +4549,8 @@ mono_class_setup_vtable_general (MonoClass *class, MonoMethod **overrides, int o
 
 					if (!cmsig || !m1sig) {
 						mono_class_set_failure (class, MONO_EXCEPTION_TYPE_LOAD, NULL);
+						g_slist_free (virt_methods);
+						if (override_map) { g_hash_table_destroy (override_map); }
 						return;
 					}
 
@@ -4860,7 +4862,9 @@ generic_array_methods (MonoClass *class)
 			list = g_list_prepend (list, m);
 		}
 	}
+
 	list = g_list_reverse (list);
+
 	generic_array_method_info = mono_image_alloc (mono_defaults.corlib, sizeof (GenericArrayMethodInfo) * count_generic);
 	i = 0;
 	for (tmp = list; tmp; tmp = tmp->next) {

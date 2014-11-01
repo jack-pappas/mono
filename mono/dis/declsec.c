@@ -168,7 +168,10 @@ dump_declsec_entry20 (MonoImage *m, const char* p, const char *indent)
 	GString *res = g_string_new ("");
 
 	if (*p++ != MONO_DECLSEC_FORMAT_20)
+	{
+		g_string_free (res, FALSE);
 		return NULL;
+	}
 
 	g_string_append (res, "{");
 

@@ -290,6 +290,7 @@ get_typeref (MonoImage *m, int idx)
 	case MONO_RESOLTION_SCOPE_MODULEREF: /* ModuleRef */
 		x = get_moduleref (m, rs_idx);
 		ret = g_strdup_printf ("[.module %s]%s%s%s", x, s, *s ? "." : "", t);
+		g_free (x);
 		break;
 			      
 	case MONO_RESOLTION_SCOPE_ASSEMBLYREF: /*
@@ -943,6 +944,9 @@ dis_stringify_method_signature_full (MonoImage *m, MonoMethodSignature *method, 
 						marshal_info = dis_stringify_marshal_spec (spec);
 					else
 						ret_marshal_info = dis_stringify_marshal_spec (spec);
+
+					/* Free 'spec' before it goes out of scope. */
+					mono_metadata_free_marshal_spec (spec);
 				} else {
 					if (i)
 						marshal_info = g_strdup ("(missing)");
@@ -1207,7 +1211,12 @@ dis_stringify_type (MonoImage *m, MonoType *type, gboolean is_def)
 		break;
 	case MONO_TYPE_VAR:
 		if (is_def && !cant_print_generic_param_name (type->data.generic_param))
-			bare = g_strdup_printf ("!%s", get_escaped_name (mono_generic_param_info (type->data.generic_param)->name));
+		{
+			char *esname;
+			esname = get_escaped_name (mono_generic_param_info (type->data.generic_param)->name);
+			bare = g_strdup_printf ("!%s", esname);
+			g_free (esname);
+		}
 		else
 			bare = g_strdup_printf ("!%d", mono_type_get_generic_param_num (type));
 		break;

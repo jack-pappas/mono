@@ -240,22 +240,26 @@ dump_table_memberref (MonoImage *m)
 		guint32 cols [MONO_MEMBERREF_SIZE];
 
 		mono_metadata_decode_row (t, i, cols, MONO_MEMBERREF_SIZE);
-		
+
 		kind = cols [MONO_MEMBERREF_CLASS] & 7;
 		idx = cols [MONO_MEMBERREF_CLASS] >> 3;
 
+		/* In the switch cases below, make sure to free the memory pointed to by 'x'
+		   before overwriting the pointer value. */
 		x = g_strdup ("UNHANDLED CASE");
-		
+
 		switch (kind){
 		case 0:
 			ks = "TypeDef";
 			xx = get_typedef (m, idx);
+			if (x) { g_free (x); }
 			x = g_strconcat (xx, ".", mono_metadata_string_heap (m, cols [MONO_MEMBERREF_NAME]), NULL);
 			g_free (xx);
 			break;
 		case 1:
 			ks = "TypeRef";
 			xx = get_typeref (m, idx);
+			if (x) { g_free (x); }
 			x = g_strconcat (xx, ".", mono_metadata_string_heap (m, cols [MONO_MEMBERREF_NAME]), NULL);
 			g_free (xx);
 			break;
@@ -263,11 +267,13 @@ dump_table_memberref (MonoImage *m)
 			ks = "ModuleRef"; break;
 		case 3:
 			ks = "MethodDef";
+			if (x){ g_free (x); }
 			x = get_methoddef (m, idx);
 			break;
 		case 4:
 			ks = "TypeSpec";
 			xx = get_typespec (m, idx, FALSE, NULL);
+			if (x) { g_free (x); }
 			x = g_strconcat (xx, ".", mono_metadata_string_heap (m, cols [MONO_MEMBERREF_NAME]), NULL);
 			g_free (xx);
 			break;

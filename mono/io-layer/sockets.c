@@ -1057,6 +1057,8 @@ static gboolean socket_disconnect (guint32 fd)
 		ret = dup2 (newsock, fd);
 	} while (ret == -1 && errno == EAGAIN);
 	
+	close (newsock);
+
 	if (ret == -1) {
 		gint errnum = errno;
 		
@@ -1068,7 +1070,6 @@ static gboolean socket_disconnect (guint32 fd)
 		return(FALSE);
 	}
 
-	close (newsock);
 	
 	return(TRUE);
 }

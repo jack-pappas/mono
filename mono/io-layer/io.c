@@ -3920,7 +3920,7 @@ gboolean GetDiskFreeSpaceEx(const gunichar2 *path_name, WapiULargeInteger *free_
 	unsigned long block_size;
 
 	if (path_name == NULL) {
-		utf8_path_name = g_strdup (g_get_current_dir());
+		utf8_path_name = g_get_current_dir ();
 		if (utf8_path_name == NULL) {
 			SetLastError (ERROR_DIRECTORY);
 			return(FALSE);
@@ -4241,7 +4241,7 @@ guint32 GetDriveType(const gunichar2 *root_path_name)
 	guint32 drive_type;
 
 	if (root_path_name == NULL) {
-		utf8_root_path_name = g_strdup (g_get_current_dir());
+		utf8_root_path_name = g_get_current_dir ();
 		if (utf8_root_path_name == NULL) {
 			return(DRIVE_NO_ROOT_DIR);
 		}

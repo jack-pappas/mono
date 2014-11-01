@@ -1427,6 +1427,7 @@ absolute_dir (const gchar *filename)
 	}
 
 	result = g_string_new ("");
+
 	list = g_list_reverse (list);
 
 	/* Ignores last data pointer, which should be the filename */
@@ -1570,10 +1571,12 @@ mono_assembly_open_full (const char *filename, MonoImageOpenStatus *status, gboo
 
 	if (image->assembly) {
 		/* Already loaded by another appdomain */
-		mono_assembly_invoke_load_hook (image->assembly);
+		MonoAssembly *image_assembly;
+		image_assembly = image->assembly;
+		mono_assembly_invoke_load_hook (image_assembly);
 		mono_image_close (image);
 		g_free (fname);
-		return image->assembly;
+		return image_assembly;
 	}
 
 	ass = mono_assembly_load_from_full (image, fname, status, refonly);

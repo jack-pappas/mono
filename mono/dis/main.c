@@ -473,6 +473,7 @@ dis_field_list (MonoImage *m, guint32 start, guint32 end, MonoGenericContainer *
 			tp = mono_metadata_get_marshal_info (m, i, TRUE);
 			spec = mono_metadata_parse_marshal_spec (m, tp);
 			marshal_str = dis_stringify_marshal_spec (spec);
+			mono_metadata_free_marshal_spec (spec);
 		}
 
 		if (cols [MONO_FIELD_FLAGS] & FIELD_ATTRIBUTE_HAS_FIELD_RVA) {
@@ -713,6 +714,7 @@ pinvoke_info (MonoImage *m, guint32 mindex)
 	const char *import, *scope;
 	char *flags;
 	int i;
+	gchar *result;
 
 	for (i = 0; i < im->rows; i++) {
 
@@ -728,10 +730,12 @@ pinvoke_info (MonoImage *m, guint32 mindex)
 						  mr_cols, MONO_MODULEREF_SIZE);
 
 			scope = mono_metadata_string_heap (m, mr_cols [MONO_MODULEREF_NAME]);
-				
-			return g_strdup_printf ("(\"%s\" as \"%s\" %s)", scope, import,
+
+
+			result = g_strdup_printf ("(\"%s\" as \"%s\" %s)", scope, import,
 						flags);
 			g_free (flags);
+			return result;
 		}
 	}
 
